@@ -1,86 +1,75 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import * as schema from '../../database/schema';
-import { eq, and, inArray, between, like } from 'drizzle-orm';
-import { PaginationOptions, ProductFilters } from '@/common/contracts/filters';
+import { Inject, Injectable } from '@nestjs/common'
+import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
+import * as schema from '../../database/schema'
+import { eq, and, SQL } from 'drizzle-orm'
+import { ProductFilters } from '@/modules/catalog/dto/filters'
+import { ICatalogRepository } from '@/modules/catalog/interfaces/catalog-repository.interface'
+import { PaginationOptions } from '@/common/dto/pagination-options.dto'
+import {
+    FILTER_STRATEGIES,
+    FilterScope,
+    FilterStrategy,
+} from '@/modules/catalog/interfaces/filter-strategy.interface'
 
 @Injectable()
-export class CatalogRepository {
+export class CatalogRepository implements ICatalogRepository {
     constructor(
         @Inject('DB_DRIZZLE')
-        private drizzleDev: PostgresJsDatabase<typeof schema>,
+        private readonly drizzleDev: PostgresJsDatabase<typeof schema>,
+        @Inject(FILTER_STRATEGIES)
+        private readonly filterStrategies: FilterStrategy[],
     ) {}
+
+    async *getProductsCursor(
+        filters: ProductFilters,
+        batchSize = 100,
+    ): AsyncGenerator<(typeof schema.products.$inferSelect)[]> {
+        let page = 1
+        while (true) {
+            const batch = await this.getProductsByFilters(filters, {
+                page,
+                limit: batchSize,
+            })
+            if (batch.length === 0) break
+            yield batch
+            if (batch.length < batchSize) break
+            page++
+        }
+    }
+
+    private applyStrategies(
+        filters: ProductFilters,
+        scope: FilterScope,
+    ): SQL[] {
+        return this.filterStrategies
+            .filter((strategy) => strategy.scopes.includes(scope))
+            .map((strategy) => strategy.apply(filters))
+            .filter((sql): sql is SQL => sql !== undefined)
+    }
 
     async getProductsByFilters(
         filters: ProductFilters,
         pagination: PaginationOptions,
     ): Promise<(typeof schema.products.$inferSelect)[]> {
-        const { page, limit } = pagination;
-        const offset = (page - 1) * limit;
+        const { page, limit } = pagination
+        const offset = (page - 1) * limit
 
-        let conditions = [
+        const baseConditions: SQL[] = [
             eq(schema.products.isVisible, true),
             eq(schema.products.isArchived, false),
-        ];
+        ]
 
-        if (filters.categories && filters.categories.length > 0) {
-            conditions.push(inArray(schema.products.pcid, filters.categories));
-        }
+        const filterConditions = this.applyStrategies(
+            filters,
+            FilterScope.PRODUCTS_LIST,
+        )
 
-        if (filters.priceRange) {
-            conditions.push(
-                between(
-                    schema.products.baseVolume,
-                    filters.priceRange.min,
-                    filters.priceRange.max,
-                ),
-            );
-        }
-
-        if (filters.brands && filters.brands.length > 0) {
-            conditions.push(inArray(schema.products.brandId, filters.brands));
-        }
-
-        if (filters.countries && filters.countries.length > 0) {
-            conditions.push(
-                inArray(schema.products.countryId, filters.countries),
-            );
-        }
-
-        if (filters.vendors && filters.vendors.length > 0) {
-            conditions.push(
-                inArray(schema.products.vendorOwnerId, filters.vendors),
-            );
-        }
-
-        if (filters.productVariant) {
-            conditions.push(
-                eq(schema.products.productVariant, filters.productVariant),
-            );
-        }
-
-        if (filters.name) {
-            conditions.push(
-                like(schema.products.productSlug, `%${filters.name}%`),
-            );
-        }
-
-        if (filters.articleNumber) {
-            conditions.push(
-                like(
-                    schema.products.articleNumber,
-                    `%${filters.articleNumber}%`,
-                ),
-            );
-        }
-
-        const query = this.drizzleDev
+        return this.drizzleDev
             .select()
             .from(schema.products)
-            .where(and(...conditions))
+            .where(and(...baseConditions, ...filterConditions))
             .offset(offset)
-            .limit(limit);
-
-        return query.execute();
+            .limit(limit)
+            .execute()
     }
 }

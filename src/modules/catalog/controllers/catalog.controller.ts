@@ -1,9 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { CatalogService } from '../catalog.service';
-import type {
-    ProductFilters,
-    PaginationOptions,
-} from '@/common/contracts/filters';
+import { Controller, Get, Query } from '@nestjs/common'
+import { CatalogService } from '../catalog.service'
+import type { ProductFilters } from '@/modules/catalog/dto/filters'
+import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 
 @Controller('catalog')
 export class CatalogController {
@@ -17,6 +15,6 @@ export class CatalogController {
         return this.catalogService.getProductsByFilters(
             filters,
             paginationOptions,
-        );
+        )
     }
 }
