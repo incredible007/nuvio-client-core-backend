@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common'
-import { CatalogService } from '../catalog.service'
+import { CatalogService } from '../services/catalog.service'
 import type { ProductFilters } from '@/modules/catalog/dto/filters'
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 

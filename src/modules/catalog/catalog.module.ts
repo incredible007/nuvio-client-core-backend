@@ -1,22 +1,41 @@
-import { Module } from '@nestjs/common';
-import { CatalogService } from './catalog.service';
-import { CatalogController } from './controllers/catalog.controller';
-import { CatalogRepository } from '@/modules/catalog/catalog.repository';
-import { CATALOG_REPOSITORY } from '@/modules/catalog/interfaces/catalog-repository.interface';
-import { FILTER_STRATEGIES } from '@/modules/catalog/interfaces/filter-strategy.interface';
-import { CategoryFilterStrategy } from '@/modules/catalog/strategies/category.filter';
-import { PriceRangeFilterStrategy } from '@/modules/catalog/strategies/price-range.filter';
-import { BrandFilterStrategy } from '@/modules/catalog/strategies/brand.filter';
-import { CountryFilter } from '@/modules/catalog/strategies/country.filter';
-import { VendorFilter } from '@/modules/catalog/strategies/vendor.filter';
-import { ProductVariantFilter } from '@/modules/catalog/strategies/product-variant.filter';
-import { NameFilter } from '@/modules/catalog/strategies/name.filter';
-import { ArticleNumberFilter } from '@/modules/catalog/strategies/article-number.filter';
+import { Module } from '@nestjs/common'
+import { CatalogService } from './services/catalog.service'
+import { CatalogController } from './controllers/catalog.controller'
+import { CatalogRepository } from '@/modules/catalog/catalog.repository'
+import { CATALOG_REPOSITORY } from '@/modules/catalog/interfaces/catalog-repository.interface'
+import { FILTER_STRATEGIES } from '@/modules/catalog/interfaces/filter-strategy.interface'
+import {
+    ArticleNumberFilter,
+    BrandFilterStrategy,
+    CategoryFilterStrategy,
+    CountryFilter,
+    NameFilter,
+    PriceRangeFilterStrategy,
+    ProductVariantFilter,
+    VendorFilter,
+} from '@/modules/catalog/strategies'
+import { CatalogQueryService } from '@/modules/catalog/services/catalog-query.service'
+import { CatalogFilterService } from '@/modules/catalog/services/catalog-filter.service'
+import { CatalogCacheService } from '@/modules/catalog/services/catalog-cache.service'
 
 @Module({
     controllers: [CatalogController],
     providers: [
         CatalogService,
+        CatalogQueryService,
+        CatalogFilterService,
+        CatalogCacheService,
+
+        // strategies
+        CategoryFilterStrategy,
+        PriceRangeFilterStrategy,
+        BrandFilterStrategy,
+        CountryFilter,
+        VendorFilter,
+        ProductVariantFilter,
+        NameFilter,
+        ArticleNumberFilter,
+
         {
             provide: CATALOG_REPOSITORY,
             useClass: CatalogRepository,

@@ -1,0 +1,26 @@
+import { Injectable } from '@nestjs/common'
+import {
+    FilterScope,
+    FilterStrategy,
+} from '../interfaces/filter-strategy.interface'
+import * as schema from '../../../database/schema'
+import { eq, SQL } from 'drizzle-orm'
+
+@Injectable()
+export class CatalogFilterService {
+    constructor(private readonly filterStrategies: FilterStrategy[]) {}
+
+    build(filters: any, scope: FilterScope): SQL[] {
+        return this.filterStrategies
+            .filter((strategy) => strategy.scopes.includes(scope))
+            .map((strategy) => strategy.apply(filters))
+            .filter((sql): sql is SQL => sql !== undefined)
+    }
+
+    buildBaseConditions(): SQL[] {
+        return [
+            eq(schema.products.isVisible, true),
+            eq(schema.products.isArchived, false),
+        ]
+    }
+}
