@@ -14,10 +14,10 @@ export class CatalogFilterService {
         private readonly filterStrategies: FilterStrategy[],
     ) {}
 
-    build(filters: any, scope: FilterScope): SQL[] {
+    build<T>(filters: T, scope: FilterScope): SQL[] {
         return this.filterStrategies
             .filter((strategy) => strategy.scopes.includes(scope))
-            .map((strategy) => strategy.apply(filters))
+            .map((strategy) => strategy.apply(filters as any))
             .filter((sql): sql is SQL => sql !== undefined)
     }
 

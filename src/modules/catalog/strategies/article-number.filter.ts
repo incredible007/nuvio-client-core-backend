@@ -2,7 +2,7 @@ import {
     FilterScope,
     FilterStrategy,
 } from '@/modules/catalog/interfaces/filter-strategy.interface'
-import { ProductFilters } from '@/modules/catalog/dto/filters'
+import { ProductFilters } from '@/modules/catalog/dto/product-filters'
 import { eq, SQL } from 'drizzle-orm'
 import { products } from '@/database/schema'
 import { Injectable } from '@nestjs/common'

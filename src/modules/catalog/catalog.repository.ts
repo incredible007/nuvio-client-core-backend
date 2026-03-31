@@ -20,7 +20,7 @@ export class CatalogRepository implements ICatalogRepository {
     ): AsyncGenerator<(typeof schema.products.$inferSelect)[]> {
         let page = 1
         while (true) {
-            const batch = await this.getProductsByFilters(conditions, {
+            const batch = await this.fetchProducts(conditions, {
                 page,
                 limit: batchSize,
             })
@@ -31,7 +31,7 @@ export class CatalogRepository implements ICatalogRepository {
         }
     }
 
-    async getProductsByFilters(
+    async fetchProducts(
         conditions: SQL[],
         pagination: PaginationOptions,
     ): Promise<Product[]> {

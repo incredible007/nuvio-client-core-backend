@@ -1,12 +1,12 @@
-import * as schema from '@/database/schema'
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 import { SQL } from 'drizzle-orm'
+import { Product } from '@/modules/catalog/interfaces/product.interface'
 
 export interface ICatalogRepository {
-    getProductsByFilters(
+    fetchProducts(
         conditions: SQL[],
         pagination: PaginationOptions,
-    ): Promise<(typeof schema.products.$inferSelect)[]>
+    ): Promise<Product[]>
 }
 
 export const CATALOG_REPOSITORY = Symbol('ICatalogRepository')

@@ -1,4 +1,4 @@
-import { ProductFilters } from '@/modules/catalog/dto/filters'
+import { ProductFilters } from '@/modules/catalog/dto/product-filters'
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 
 export class CacheKeyFactory {
