@@ -6,9 +6,10 @@ import { ProductFilters } from '@/modules/catalog/dto/filters'
 import { inArray, SQL } from 'drizzle-orm'
 import * as schema from '@/database/schema'
 import { Injectable } from '@nestjs/common'
+import { CategoryFilterStrategy } from '@/modules/catalog/strategies/category.filter'
 
 @Injectable()
-export class CountryFilter implements FilterStrategy {
+export class CountryFilterStrategy implements FilterStrategy {
     readonly scopes = [FilterScope.PRODUCTS_LIST, FilterScope.PRODUCT_SEARCH]
     apply(filters: ProductFilters): SQL | undefined {
         if (!filters.countries?.length) return undefined

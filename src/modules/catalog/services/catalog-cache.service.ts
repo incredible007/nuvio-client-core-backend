@@ -5,7 +5,7 @@ import { CacheKeyFactory } from '@/modules/catalog/factory/cache-key.factory'
 
 @Injectable()
 export class CatalogCacheService {
-    private readonly TTL = 300_000 // 5 минут
+    private readonly TTL = 300_000 // 5 minutes
 
     constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {}
 

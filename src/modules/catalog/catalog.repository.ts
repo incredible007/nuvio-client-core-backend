@@ -4,12 +4,13 @@ import * as schema from '../../database/schema'
 import { and, SQL } from 'drizzle-orm'
 import { ICatalogRepository } from '@/modules/catalog/interfaces/catalog-repository.interface'
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
+import { DB_DRIZZLE } from '@/database/database.module'
 
 @Injectable()
 export class CatalogRepository implements ICatalogRepository {
     constructor(
-        @Inject('DB_DRIZZLE')
-        private readonly drizzleDev: PostgresJsDatabase<typeof schema>,
+        @Inject(DB_DRIZZLE)
+        private readonly db: PostgresJsDatabase<typeof schema>,
     ) {}
 
     async *getProductsCursor(
@@ -39,7 +40,7 @@ export class CatalogRepository implements ICatalogRepository {
         const whereCondition =
             conditions.length > 0 ? and(...conditions) : undefined
 
-        return this.drizzleDev
+        return this.db
             .select()
             .from(schema.products)
             .where(whereCondition)

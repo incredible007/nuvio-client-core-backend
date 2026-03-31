@@ -1,13 +1,13 @@
-import type { Config } from 'drizzle-kit';
+import type { Config } from 'drizzle-kit'
 
 export default {
     schema: './src/database/*',
     out: './src/database',
     dialect: 'postgresql',
     dbCredentials: {
-        url: encodeURI(process.env.DB_URL ?? ''),
+        url: process.env.DB_URL!,
     },
     schemaFilter: ['public'],
     strict: true,
     verbose: false,
-} satisfies Config;
+} satisfies Config

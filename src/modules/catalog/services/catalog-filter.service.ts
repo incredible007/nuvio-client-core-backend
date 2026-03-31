@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import {
+    FILTER_STRATEGIES,
     FilterScope,
     FilterStrategy,
 } from '../interfaces/filter-strategy.interface'
@@ -8,7 +9,10 @@ import { eq, SQL } from 'drizzle-orm'
 
 @Injectable()
 export class CatalogFilterService {
-    constructor(private readonly filterStrategies: FilterStrategy[]) {}
+    constructor(
+        @Inject(FILTER_STRATEGIES)
+        private readonly filterStrategies: FilterStrategy[],
+    ) {}
 
     build(filters: any, scope: FilterScope): SQL[] {
         return this.filterStrategies
