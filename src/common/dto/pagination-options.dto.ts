@@ -1,17 +1,8 @@
-import { IsOptional, IsInt, Min, Max } from 'class-validator';
-import { Type } from 'class-transformer';
+import { z } from 'zod'
 
-export class PaginationOptions {
-    @IsOptional()
-    @IsInt()
-    @Type(() => Number)
-    @Min(1)
-    page: number = 1;
+export const PaginationOptionsSchema = z.object({
+    page: z.number().min(1).default(1),
+    limit: z.number().min(1).max(1_000).default(20),
+})
 
-    @IsOptional()
-    @IsInt()
-    @Min(1)
-    @Max(1_000)
-    @Type(() => Number)
-    limit: number = 20;
-}
+export type PaginationOptions = z.infer<typeof PaginationOptionsSchema>

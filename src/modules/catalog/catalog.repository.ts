@@ -5,6 +5,7 @@ import { and, SQL } from 'drizzle-orm'
 import { ICatalogRepository } from '@/modules/catalog/interfaces/catalog-repository.interface'
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 import { DB_DRIZZLE } from '@/database/database.module'
+import { Product } from '@/modules/catalog/interfaces/product.interface'
 
 @Injectable()
 export class CatalogRepository implements ICatalogRepository {
@@ -33,7 +34,7 @@ export class CatalogRepository implements ICatalogRepository {
     async getProductsByFilters(
         conditions: SQL[],
         pagination: PaginationOptions,
-    ): Promise<(typeof schema.products.$inferSelect)[]> {
+    ): Promise<Product[]> {
         const { page, limit } = pagination
         const offset = (page - 1) * limit
 

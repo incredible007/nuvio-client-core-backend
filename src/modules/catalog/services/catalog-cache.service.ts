@@ -2,6 +2,8 @@ import { Inject, Injectable } from '@nestjs/common'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Cache } from 'cache-manager'
 import { CacheKeyFactory } from '@/modules/catalog/factory/cache-key.factory'
+import { ProductFilters } from '@/modules/catalog/dto/filters'
+import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 
 @Injectable()
 export class CatalogCacheService {
@@ -16,6 +18,14 @@ export class CatalogCacheService {
 
     async set<T>(key: string, value: T): Promise<void> {
         await this.cache.set(key, value, this.TTL)
+    }
+
+    async invalidateProducts(
+        filters: ProductFilters,
+        pagination: PaginationOptions,
+    ): Promise<void> {
+        const key = this.buildKey(filters, pagination)
+        await this.cache.del(key)
     }
 
     buildKey(filters: any, pagination: any): string {
