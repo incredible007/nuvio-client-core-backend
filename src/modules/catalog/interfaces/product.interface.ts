@@ -20,4 +20,7 @@ export type Product = typeof schema.products.$inferSelect & {
     productMedia?: (typeof schema.productMedia.$inferSelect & {
         media?: typeof schema.media.$inferSelect
     })[]
+    reviews?: (typeof schema.productReviews.$inferSelect & {
+        client?: typeof schema.clients.$inferSelect | null
+    })[]
 }

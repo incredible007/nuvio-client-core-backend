@@ -29,4 +29,9 @@ export class CatalogController {
             paginationOptions,
         )
     }
+
+    @Get('fetch_product')
+    async fetchProduct(@Query() pid: number) {
+        return this.catalogService.fetchProduct(pid)
+    }
 }

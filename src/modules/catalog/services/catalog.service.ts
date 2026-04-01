@@ -21,4 +21,8 @@ export class CatalogService {
     ) {
         return this.queryService.fetchRecommendedProducts(dto, pagination)
     }
+
+    async fetchProduct(pid: number) {
+        return this.queryService.fetchProduct(pid)
+    }
 }

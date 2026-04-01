@@ -28,7 +28,15 @@ export class CatalogCacheService {
         await this.cache.del(key)
     }
 
-    buildKey(filters: any, pagination: any): string {
-        return CacheKeyFactory.forProducts(filters, pagination)
+    buildKey(id: number): string
+    buildKey(filters: ProductFilters, pagination: PaginationOptions): string
+    buildKey(
+        filtersOrId: ProductFilters | number,
+        pagination?: PaginationOptions,
+    ): string {
+        if (typeof filtersOrId === 'number') {
+            return CacheKeyFactory.forProduct(filtersOrId)
+        }
+        return CacheKeyFactory.forProducts(filtersOrId, pagination!)
     }
 }

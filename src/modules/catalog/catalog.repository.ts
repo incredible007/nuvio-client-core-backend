@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import * as schema from '../../database/schema'
-import { and, eq, getTableColumns, inArray, sql, SQL } from 'drizzle-orm'
+import { and, eq, getTableColumns, inArray, SQL } from 'drizzle-orm'
 import { ICatalogRepository } from '@/modules/catalog/interfaces/catalog-repository.interface'
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 import { DB_DRIZZLE } from '@/database/database.module'
@@ -31,17 +31,8 @@ export class CatalogRepository implements ICatalogRepository {
         }
     }
 
-    async fetchProducts(
-        conditions: SQL[],
-        pagination: PaginationOptions,
-    ): Promise<Product[]> {
-        const { page, limit } = pagination
-        const offset = (page - 1) * limit
-
-        const whereCondition =
-            conditions.length > 0 ? and(...conditions) : undefined
-
-        const rows = await this.db
+    private baseProductQuery() {
+        return this.db
             .select({
                 ...getTableColumns(schema.products),
                 vendor: getTableColumns(schema.vendors),
@@ -66,22 +57,18 @@ export class CatalogRepository implements ICatalogRepository {
                 schema.dCountries,
                 eq(schema.dCountries.id, schema.products.countryId),
             )
-            .where(whereCondition)
-            .offset(offset)
-            .limit(limit)
+    }
 
+    private async fetchProductLocalizations(rows: Product[]) {
         const categoryIds = [
             ...new Set(rows.map((r) => r.category?.pcid).filter(Boolean)),
         ] as number[]
-
         const brandIds = [
             ...new Set(rows.map((r) => r.brand?.id).filter(Boolean)),
         ] as number[]
-
         const countryIds = [
             ...new Set(rows.map((r) => r.country?.id).filter(Boolean)),
         ] as number[]
-
         const productIds = [...new Set(rows.map((r) => r.pid))] as number[]
 
         const [categoryLocs, brandLocs, countryLocs, productMedia] =
@@ -119,20 +106,33 @@ export class CatalogRepository implements ICatalogRepository {
                               ),
                           )
                     : [],
-                this.db
-                    .select({
-                        ...getTableColumns(schema.productMedia),
-                        media: getTableColumns(schema.media),
-                    })
-                    .from(schema.productMedia)
-                    .where(inArray(schema.productMedia.pid, productIds)),
+                productIds.length
+                    ? this.db
+                          .select({
+                              ...getTableColumns(schema.productMedia),
+                              media: getTableColumns(schema.media),
+                          })
+                          .from(schema.productMedia)
+                          .where(inArray(schema.productMedia.pid, productIds))
+                    : [],
             ])
 
-        const categoryLocMap = Map.groupBy(categoryLocs, (l) => l.pcid)
-        const brandLocMap = Map.groupBy(brandLocs, (l) => l.id)
-        const countryLocMap = Map.groupBy(countryLocs, (l) => l.id)
+        return {
+            categoryLocMap: Map.groupBy(categoryLocs, (l) => l.pcid),
+            brandLocMap: Map.groupBy(brandLocs, (l) => l.id),
+            countryLocMap: Map.groupBy(countryLocs, (l) => l.id),
+            productMedia,
+        }
+    }
 
-        return rows.map(({ category, vendor, brand, country, ...product }) => ({
+    private mapRow(
+        row: Awaited<ReturnType<typeof this.baseProductQuery>>[number],
+        locMaps: Awaited<ReturnType<typeof this.fetchProductLocalizations>>,
+    ): Product {
+        const { category, vendor, brand, country, ...product } = row
+        const { categoryLocMap, brandLocMap, countryLocMap, productMedia } =
+            locMaps
+        return {
             ...product,
             vendor,
             category: category?.pcid
@@ -142,10 +142,7 @@ export class CatalogRepository implements ICatalogRepository {
                   }
                 : null,
             brand: brand?.id
-                ? {
-                      ...brand,
-                      localizations: brandLocMap.get(brand.id) ?? [],
-                  }
+                ? { ...brand, localizations: brandLocMap.get(brand.id) ?? [] }
                 : null,
             country: country?.id
                 ? {
@@ -153,7 +150,51 @@ export class CatalogRepository implements ICatalogRepository {
                       localizations: countryLocMap.get(country.id) ?? [],
                   }
                 : null,
-            productMedia: productMedia,
-        }))
+            productMedia,
+        }
+    }
+
+    async fetchProduct(conditions: SQL[]): Promise<Product> {
+        const whereCondition =
+            conditions.length > 0 ? and(...conditions) : undefined
+        const rows = await this.baseProductQuery()
+            .where(whereCondition)
+            .limit(1)
+        const locs = await this.fetchProductLocalizations(rows)
+        const productReviews = await this.db
+            .select({
+                ...getTableColumns(schema.productReviews),
+                client: getTableColumns(schema.clients),
+            })
+            .from(schema.productReviews)
+            .leftJoin(
+                schema.clients,
+                eq(schema.productReviews.cid, schema.clients.cid),
+            )
+            .where(eq(schema.productReviews.pid, rows[0].pid))
+            .limit(20)
+
+        const product = this.mapRow(rows[0], locs)
+
+        return {
+            ...product,
+            reviews: productReviews,
+        }
+    }
+
+    async fetchProducts(
+        conditions: SQL[],
+        pagination: PaginationOptions,
+    ): Promise<Product[]> {
+        const { page, limit } = pagination
+        const offset = (page - 1) * limit
+        const whereCondition =
+            conditions.length > 0 ? and(...conditions) : undefined
+        const rows = await this.baseProductQuery()
+            .where(whereCondition)
+            .offset(offset)
+            .limit(limit)
+        const locs = await this.fetchProductLocalizations(rows)
+        return rows.map((row) => this.mapRow(row, locs))
     }
 }

@@ -7,6 +7,7 @@ export interface ICatalogRepository {
         conditions: SQL[],
         pagination: PaginationOptions,
     ): Promise<Product[]>
+    fetchProduct(conditions: SQL[]): Promise<Product>
 }
 
 export const CATALOG_REPOSITORY = Symbol('ICatalogRepository')
