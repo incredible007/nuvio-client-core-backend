@@ -4,7 +4,7 @@ import { ProductFiltersDto } from '@/modules/catalog/dto/product-filters.dto'
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 import { SearchProductsDto } from '@/modules/catalog/dto/search-products.dto'
 import { Product } from '@/modules/catalog/interfaces/product.interface'
-import { async } from 'rxjs'
+import { WishlistProductsDto } from '@/modules/catalog/dto/wishlist-products.dto'
 
 @Injectable()
 export class CatalogService {
@@ -35,6 +35,14 @@ export class CatalogService {
             pagination,
             filters,
         )
+    }
+
+    async fetchWishlistProducts(
+        dto: WishlistProductsDto,
+        pagination: PaginationOptions,
+        filters?: ProductFiltersDto,
+    ) {
+        return this.queryService.fetchWishlistProducts(dto, pagination, filters)
     }
 
     async fetchProduct(pid: number) {

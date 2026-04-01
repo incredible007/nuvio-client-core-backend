@@ -12,6 +12,7 @@ import { Product } from '@/modules/catalog/interfaces/product.interface'
 import { eq, SQL } from 'drizzle-orm'
 import * as schema from '@/database/schema'
 import { SearchProductsDto } from '@/modules/catalog/dto/search-products.dto'
+import { WishlistProductsDto } from '@/modules/catalog/dto/wishlist-products.dto'
 
 @Injectable()
 export class CatalogQueryService {
@@ -21,6 +22,22 @@ export class CatalogQueryService {
         private readonly filterService: CatalogFilterService,
         private readonly cacheService: CatalogCacheService,
     ) {}
+
+    async fetchWishlistProducts(
+        dto: WishlistProductsDto,
+        pagination: PaginationOptions,
+        filters?: ProductFiltersDto,
+    ) {
+        const baseConditions = this.filterService.buildBaseConditions()
+        const filterConditions = this.filterService.build(
+            { ...dto, ...filters },
+            FilterScope.PRODUCT_SEARCH,
+        )
+        return this.repository.fetchProducts(
+            [...baseConditions, ...filterConditions],
+            pagination,
+        )
+    }
 
     async searchProducts(
         dto: SearchProductsDto,

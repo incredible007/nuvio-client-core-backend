@@ -5,6 +5,7 @@ import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
 import { SearchProductsDto } from '@/modules/catalog/dto/search-products.dto'
 import { Product } from '@/modules/catalog/interfaces/product.interface'
+import { WishlistProductsDto } from '@/modules/catalog/dto/wishlist-products.dto'
 
 @ApiTags('catalog')
 @Controller('catalog')
@@ -62,5 +63,23 @@ export class CatalogController {
         @Query() filters?: ProductFiltersDto,
     ): Promise<Product[]> {
         return this.catalogService.searchProducts(dto, pagination, filters)
+    }
+
+    @Get('fetch_wishlist_products')
+    @ApiOperation({
+        summary: 'Получение товары из списка желаемого',
+        description:
+            'Возвращает постраничный список товаров из списка желаемого с применением фильтров',
+    })
+    async fetchWishlistProducts(
+        @Query() dto: WishlistProductsDto,
+        @Query() pagination: PaginationOptions,
+        @Query() filters?: ProductFiltersDto,
+    ) {
+        return this.catalogService.fetchWishlistProducts(
+            dto,
+            pagination,
+            filters,
+        )
     }
 }
