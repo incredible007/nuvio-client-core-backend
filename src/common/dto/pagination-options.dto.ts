@@ -1,8 +1,26 @@
-import { z } from 'zod'
+import { Type } from 'class-transformer'
+import { IsInt, Min, Max } from 'class-validator'
+import { ApiPropertyOptional } from '@nestjs/swagger'
 
-export const PaginationOptionsSchema = z.object({
-    page: z.number().min(1).default(1),
-    limit: z.number().min(1).max(1_000).default(20),
-})
+export class PaginationOptions {
+    @ApiPropertyOptional({
+        description: 'Номер страницы',
+        example: 1,
+        default: 1,
+    })
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
+    page: number = 1
 
-export type PaginationOptions = z.infer<typeof PaginationOptionsSchema>
+    @ApiPropertyOptional({
+        description: 'Количество элементов на странице',
+        example: 20,
+        default: 20,
+    })
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
+    @Max(1_000)
+    limit: number = 20
+}

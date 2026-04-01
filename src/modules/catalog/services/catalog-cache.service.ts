@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Cache } from 'cache-manager'
 import { CacheKeyFactory } from '@/modules/catalog/factory/cache-key.factory'
-import { ProductFilters } from '@/modules/catalog/dto/product-filters'
+import { ProductFiltersDto } from '@/modules/catalog/dto/product-filters.dto'
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 
 @Injectable()
@@ -21,7 +21,7 @@ export class CatalogCacheService {
     }
 
     async invalidateProducts(
-        filters: ProductFilters,
+        filters: ProductFiltersDto,
         pagination: PaginationOptions,
     ): Promise<void> {
         const key = this.buildKey(filters, pagination)
@@ -29,9 +29,9 @@ export class CatalogCacheService {
     }
 
     buildKey(id: number): string
-    buildKey(filters: ProductFilters, pagination: PaginationOptions): string
+    buildKey(filters: ProductFiltersDto, pagination: PaginationOptions): string
     buildKey(
-        filtersOrId: ProductFilters | number,
+        filtersOrId: ProductFiltersDto | number,
         pagination?: PaginationOptions,
     ): string {
         if (typeof filtersOrId === 'number') {

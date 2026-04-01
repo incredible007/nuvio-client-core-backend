@@ -1,7 +1,7 @@
 import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator'
 import { Type } from 'class-transformer'
 
-export class ProductFilters {
+export class ProductFiltersDto {
     @IsOptional()
     @Type(() => Array)
     categories?: number[]

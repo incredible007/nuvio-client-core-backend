@@ -1,9 +1,9 @@
-import { ProductFilters } from '@/modules/catalog/dto/product-filters'
+import { ProductFiltersDto } from '@/modules/catalog/dto/product-filters.dto'
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 
 export class CacheKeyFactory {
     static forProducts(
-        filters: ProductFilters,
+        filters: ProductFiltersDto,
         pagination: PaginationOptions,
     ): string {
         return `catalog:products:${JSON.stringify({ filters, pagination })}`

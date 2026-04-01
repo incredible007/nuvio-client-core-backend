@@ -1,22 +1,22 @@
 import { Injectable } from '@nestjs/common'
 import { CatalogQueryService } from './catalog-query.service'
-import { ProductFilters } from '@/modules/catalog/dto/product-filters'
+import { ProductFiltersDto } from '@/modules/catalog/dto/product-filters.dto'
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
-import { RecommendedProductsFilters } from '@/modules/catalog/dto/recommended-filters'
+import { RecommendedProductsDto } from '@/modules/catalog/dto/recommended.dto'
 
 @Injectable()
 export class CatalogService {
     constructor(private readonly queryService: CatalogQueryService) {}
 
     async getProductsByFilters(
-        filters: ProductFilters,
+        filters: ProductFiltersDto,
         pagination: PaginationOptions,
     ) {
         return this.queryService.getProductsByFilters(filters, pagination)
     }
 
     async fetchRecommendedProducts(
-        dto: RecommendedProductsFilters,
+        dto: RecommendedProductsDto,
         pagination: PaginationOptions,
     ) {
         return this.queryService.fetchRecommendedProducts(dto, pagination)

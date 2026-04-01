@@ -7,9 +7,9 @@ import {
     ICatalogRepository,
 } from '@/modules/catalog/interfaces/catalog-repository.interface'
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
-import { ProductFilters } from '@/modules/catalog/dto/product-filters'
+import { ProductFiltersDto } from '@/modules/catalog/dto/product-filters.dto'
 import { Product } from '@/modules/catalog/interfaces/product.interface'
-import { RecommendedProductsFilters } from '@/modules/catalog/dto/recommended-filters'
+import { RecommendedProductsDto } from '@/modules/catalog/dto/recommended.dto'
 import { eq } from 'drizzle-orm'
 import * as schema from '@/database/schema'
 
@@ -23,7 +23,7 @@ export class CatalogQueryService {
     ) {}
 
     async fetchRecommendedProducts(
-        dto: RecommendedProductsFilters,
+        dto: RecommendedProductsDto,
         pagination: PaginationOptions,
     ): Promise<Product[]> {
         return this.fetchProductsWithCache(
@@ -34,7 +34,7 @@ export class CatalogQueryService {
     }
 
     async getProductsByFilters(
-        filters: ProductFilters,
+        filters: ProductFiltersDto,
         pagination: PaginationOptions,
     ): Promise<Product[]> {
         return this.fetchProductsWithCache(
