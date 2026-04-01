@@ -9,7 +9,6 @@ import {
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 import { ProductFiltersDto } from '@/modules/catalog/dto/product-filters.dto'
 import { Product } from '@/modules/catalog/interfaces/product.interface'
-import { RecommendedProductsDto } from '@/modules/catalog/dto/recommended.dto'
 import { eq } from 'drizzle-orm'
 import * as schema from '@/database/schema'
 
@@ -23,24 +22,64 @@ export class CatalogQueryService {
     ) {}
 
     async fetchRecommendedProducts(
-        dto: RecommendedProductsDto,
+        pid: number,
         pagination: PaginationOptions,
+        filters?: ProductFiltersDto,
     ): Promise<Product[]> {
-        return this.fetchProductsWithCache(
-            dto,
-            pagination,
-            FilterScope.RECOMMENDED_PRODUCTS,
+        return this.withCache(
+            this.cacheService.buildKey(pid, 'recommended', pagination, filters),
+            () => {
+                const baseConditions = this.filterService.buildBaseConditions()
+                const filterConditions = this.filterService.build(
+                    filters,
+                    FilterScope.PRODUCTS_LIST,
+                )
+
+                return this.repository.fetchProducts(
+                    [
+                        ...baseConditions,
+                        ...filterConditions,
+                        eq(schema.recommendedProducts.productId, pid),
+                    ],
+                    pagination,
+                )
+            },
         )
     }
 
-    async getProductsByFilters(
+    async fetchProducts(
         filters: ProductFiltersDto,
         pagination: PaginationOptions,
     ): Promise<Product[]> {
-        return this.fetchProductsWithCache(
-            filters,
-            pagination,
-            FilterScope.PRODUCTS_LIST,
+        return this.withCache(
+            this.cacheService.buildKey(filters, pagination),
+            () => {
+                const baseConditions = this.filterService.buildBaseConditions()
+                const filterConditions = this.filterService.build(
+                    filters,
+                    FilterScope.PRODUCTS_LIST,
+                )
+
+                return this.repository.fetchProducts(
+                    [...baseConditions, ...filterConditions],
+                    pagination,
+                )
+            },
+        )
+    }
+
+    async fetchProduct(pid: number): Promise<Product> {
+        return this.withCache(
+            this.cacheService.buildKey(pid, 'product'),
+            () => {
+                const baseConditions = this.filterService.buildBaseConditions()
+                const currConditions = [eq(schema.products.pid, pid)]
+
+                return this.repository.fetchProduct([
+                    ...baseConditions,
+                    ...currConditions,
+                ])
+            },
         )
     }
 
@@ -53,36 +92,5 @@ export class CatalogQueryService {
         const result = await fetcher()
         await this.cacheService.set(key, result)
         return result
-    }
-
-    async fetchProduct(pid: number): Promise<Product> {
-        return this.withCache(this.cacheService.buildKey(pid), () => {
-            const baseConditions = this.filterService.buildBaseConditions()
-            const currConditions = [eq(schema.products.pid, pid)]
-
-            return this.repository.fetchProduct([
-                ...baseConditions,
-                ...currConditions,
-            ])
-        })
-    }
-
-    private async fetchProductsWithCache(
-        dto: object,
-        pagination: PaginationOptions,
-        scope: FilterScope,
-    ): Promise<Product[]> {
-        return this.withCache(
-            this.cacheService.buildKey(dto, pagination),
-            () => {
-                const baseConditions = this.filterService.buildBaseConditions()
-                const filterConditions = this.filterService.build(dto, scope)
-
-                return this.repository.fetchProducts(
-                    [...baseConditions, ...filterConditions],
-                    pagination,
-                )
-            },
-        )
     }
 }

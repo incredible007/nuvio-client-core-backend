@@ -2,7 +2,6 @@ import { Controller, Get, Query } from '@nestjs/common'
 import { CatalogService } from '../services/catalog.service'
 import type { ProductFiltersDto } from '@/modules/catalog/dto/product-filters.dto'
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
-import { RecommendedProductsDto } from '@/modules/catalog/dto/recommended.dto'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
 
 @ApiTags('catalog')
@@ -16,14 +15,11 @@ export class CatalogController {
         description:
             'Возвращает постраничный список товаров с применением фильтров',
     })
-    async getProductsByFilters(
+    async fetchProducts(
         @Query() filters: ProductFiltersDto,
         @Query() paginationOptions: PaginationOptions,
     ) {
-        return this.catalogService.getProductsByFilters(
-            filters,
-            paginationOptions,
-        )
+        return this.catalogService.fetchProducts(filters, paginationOptions)
     }
 
     @Get('fetch_recommended_products')
@@ -33,12 +29,14 @@ export class CatalogController {
             'Возвращает постраничный список рекомендованных товаров для выбранного товара',
     })
     async fetchRecommendedProducts(
-        @Query() dto: RecommendedProductsDto,
+        @Query() pid: number,
         @Query() paginationOptions: PaginationOptions,
+        @Query() filters?: ProductFiltersDto,
     ) {
         return this.catalogService.fetchRecommendedProducts(
-            dto,
+            pid,
             paginationOptions,
+            filters,
         )
     }
 

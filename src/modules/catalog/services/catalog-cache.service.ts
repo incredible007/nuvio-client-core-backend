@@ -28,15 +28,33 @@ export class CatalogCacheService {
         await this.cache.del(key)
     }
 
-    buildKey(id: number): string
+    buildKey(id: number, scope: 'product'): string
+    buildKey(
+        id: number,
+        scope: 'recommended',
+        pagination: PaginationOptions,
+        filters?: ProductFiltersDto,
+    ): string
     buildKey(filters: ProductFiltersDto, pagination: PaginationOptions): string
     buildKey(
         filtersOrId: ProductFiltersDto | number,
+        scopeOrPagination?: 'product' | 'recommended' | PaginationOptions,
         pagination?: PaginationOptions,
+        filters?: ProductFiltersDto,
     ): string {
         if (typeof filtersOrId === 'number') {
+            if (scopeOrPagination === 'recommended') {
+                return CacheKeyFactory.forRecommended(
+                    filtersOrId,
+                    pagination!,
+                    filters,
+                )
+            }
             return CacheKeyFactory.forProduct(filtersOrId)
         }
-        return CacheKeyFactory.forProducts(filtersOrId, pagination!)
+        return CacheKeyFactory.forProducts(
+            filtersOrId,
+            scopeOrPagination as PaginationOptions,
+        )
     }
 }

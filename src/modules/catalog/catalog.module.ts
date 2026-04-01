@@ -17,7 +17,6 @@ import {
 import { CatalogQueryService } from '@/modules/catalog/services/catalog-query.service'
 import { CatalogFilterService } from '@/modules/catalog/services/catalog-filter.service'
 import { CatalogCacheService } from '@/modules/catalog/services/catalog-cache.service'
-import { RecommendedProductFilterStrategy } from '@/modules/catalog/strategies/recommended-product.filter'
 
 @Module({
     controllers: [CatalogController],
@@ -36,7 +35,6 @@ import { RecommendedProductFilterStrategy } from '@/modules/catalog/strategies/r
         ProductVariantFilter,
         NameFilterStrategy,
         ArticleNumberFilter,
-        RecommendedProductFilterStrategy,
 
         {
             provide: CATALOG_REPOSITORY,
@@ -53,7 +51,6 @@ import { RecommendedProductFilterStrategy } from '@/modules/catalog/strategies/r
                 productVariant: ProductVariantFilter,
                 name: NameFilterStrategy,
                 articleNumber: ArticleNumberFilter,
-                recommendedProduct: RecommendedProductFilterStrategy,
             ) => [
                 category,
                 priceRange,
@@ -63,7 +60,6 @@ import { RecommendedProductFilterStrategy } from '@/modules/catalog/strategies/r
                 productVariant,
                 name,
                 articleNumber,
-                recommendedProduct,
             ],
             inject: [
                 CategoryFilterStrategy,
@@ -74,7 +70,6 @@ import { RecommendedProductFilterStrategy } from '@/modules/catalog/strategies/r
                 ProductVariantFilter,
                 NameFilterStrategy,
                 ArticleNumberFilter,
-                RecommendedProductFilterStrategy,
             ],
         },
     ],

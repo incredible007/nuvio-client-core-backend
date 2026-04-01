@@ -10,7 +10,7 @@ import { CategoryFilterStrategy } from '@/modules/catalog/strategies/category.fi
 
 @Injectable()
 export class CountryFilterStrategy implements FilterStrategy {
-    readonly scopes = [FilterScope.PRODUCTS_LIST, FilterScope.PRODUCT_SEARCH]
+    readonly scopes = [FilterScope.PRODUCTS_LIST]
     apply(filters: ProductFiltersDto): SQL | undefined {
         if (!filters.countries?.length) return undefined
         return inArray(schema.products.countryId, filters.countries)
