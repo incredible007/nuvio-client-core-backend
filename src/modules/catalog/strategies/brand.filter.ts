@@ -9,7 +9,7 @@ import * as schema from '@/database/schema'
 
 @Injectable()
 export class BrandFilterStrategy implements FilterStrategy {
-    readonly scopes = [FilterScope.PRODUCTS_LIST]
+    readonly scopes = [FilterScope.PRODUCTS_LIST, FilterScope.PRODUCT_SEARCH]
     apply(filters: ProductFiltersDto): SQL | undefined {
         if (!filters.brands?.length) return undefined
         return inArray(schema.products.brandId, filters.brands)

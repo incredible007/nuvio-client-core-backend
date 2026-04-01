@@ -6,9 +6,14 @@ export enum FilterScope {
     PRODUCT_SEARCH = 'PRODUCT_SEARCH',
 }
 
+export interface FilterResult {
+    where?: SQL
+    orderBy?: SQL
+}
+
 export interface FilterStrategy<T = ProductFiltersDto> {
     scopes: FilterScope[]
-    apply(filters: T): SQL | undefined
+    apply(dto: T): SQL | FilterResult | undefined
 }
 
 export const FILTER_STRATEGIES = Symbol('FILTER_STRATEGIES')

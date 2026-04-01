@@ -9,7 +9,7 @@ import { Injectable } from '@nestjs/common'
 
 @Injectable()
 export class ArticleNumberFilter implements FilterStrategy {
-    readonly scopes = [FilterScope.PRODUCTS_LIST, FilterScope.PRODUCT_SEARCH]
+    readonly scopes = [FilterScope.PRODUCTS_LIST]
 
     apply(filters: ProductFiltersDto): SQL | undefined {
         if (!filters.articleNumber) return undefined

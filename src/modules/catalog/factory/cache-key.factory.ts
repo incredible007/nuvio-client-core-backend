@@ -20,4 +20,8 @@ export class CacheKeyFactory {
     ): string {
         return `recommended:${pid}:${JSON.stringify({ pagination, filters })}`
     }
+
+    static forSearch(query: string, pagination: PaginationOptions): string {
+        return `search:${query}:${pagination.page}:${pagination.limit}`
+    }
 }

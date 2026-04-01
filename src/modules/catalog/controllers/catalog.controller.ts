@@ -3,6 +3,8 @@ import { CatalogService } from '../services/catalog.service'
 import type { ProductFiltersDto } from '@/modules/catalog/dto/product-filters.dto'
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import { SearchProductsDto } from '@/modules/catalog/dto/search-products.dto'
+import { Product } from '@/modules/catalog/interfaces/product.interface'
 
 @ApiTags('catalog')
 @Controller('catalog')
@@ -47,5 +49,18 @@ export class CatalogController {
     })
     async fetchProduct(@Query() pid: number) {
         return this.catalogService.fetchProduct(pid)
+    }
+
+    @Get('search_products')
+    @ApiOperation({
+        summary: 'Поиск по товарам',
+        description: 'Возвращает массив моделей продукта',
+    })
+    async searchProducts(
+        @Query() dto: SearchProductsDto,
+        @Query() pagination: PaginationOptions,
+        @Query() filters?: ProductFiltersDto,
+    ): Promise<Product[]> {
+        return this.catalogService.searchProducts(dto, pagination, filters)
     }
 }

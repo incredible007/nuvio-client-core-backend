@@ -6,6 +6,7 @@ import { ICatalogRepository } from '@/modules/catalog/interfaces/catalog-reposit
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 import { DB_DRIZZLE } from '@/database/database.module'
 import { Product } from '@/modules/catalog/interfaces/product.interface'
+import { FilterResult } from '@/modules/catalog/interfaces/filter-strategy.interface'
 
 @Injectable()
 export class CatalogRepository implements ICatalogRepository {
@@ -13,6 +14,46 @@ export class CatalogRepository implements ICatalogRepository {
         @Inject(DB_DRIZZLE)
         private readonly db: PostgresJsDatabase<typeof schema>,
     ) {}
+
+    private resolveConditions(conditions: Array<SQL | FilterResult>): {
+        where: SQL | undefined
+        orderBy: SQL | undefined
+    } {
+        const whereClauses: SQL[] = []
+        const orderByClauses: SQL[] = []
+
+        for (const condition of conditions) {
+            if (!condition) continue
+            if (condition instanceof SQL) {
+                whereClauses.push(condition)
+            } else {
+                if (condition.where) whereClauses.push(condition.where)
+                if (condition.orderBy) orderByClauses.push(condition.orderBy)
+            }
+        }
+
+        return {
+            where: whereClauses.length > 0 ? and(...whereClauses) : undefined,
+            orderBy:
+                orderByClauses.length > 0 ? and(...orderByClauses) : undefined,
+        }
+    }
+
+    async searchProducts(
+        conditions: SQL[],
+        pagination: PaginationOptions,
+    ): Promise<Product[]> {
+        const { page, limit } = pagination
+        const offset = (page - 1) * limit
+        const { where, orderBy } = this.resolveConditions(conditions)
+        const query = this.baseProductQuery()
+            .where(where)
+            .limit(limit)
+            .offset(offset)
+        const rows = await (orderBy ? query.orderBy(orderBy) : query)
+        const locs = await this.fetchProductLocalizations(rows)
+        return rows.map((row) => this.mapRow(row, locs))
+    }
 
     async *getProductsCursor(
         conditions: SQL[],

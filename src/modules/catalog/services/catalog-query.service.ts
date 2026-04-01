@@ -9,8 +9,9 @@ import {
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 import { ProductFiltersDto } from '@/modules/catalog/dto/product-filters.dto'
 import { Product } from '@/modules/catalog/interfaces/product.interface'
-import { eq } from 'drizzle-orm'
+import { eq, SQL } from 'drizzle-orm'
 import * as schema from '@/database/schema'
+import { SearchProductsDto } from '@/modules/catalog/dto/search-products.dto'
 
 @Injectable()
 export class CatalogQueryService {
@@ -20,6 +21,31 @@ export class CatalogQueryService {
         private readonly filterService: CatalogFilterService,
         private readonly cacheService: CatalogCacheService,
     ) {}
+
+    async searchProducts(
+        dto: SearchProductsDto,
+        pagination: PaginationOptions,
+        filters?: ProductFiltersDto,
+    ): Promise<Product[]> {
+        return this.withCache(
+            this.cacheService.buildKey(
+                'search',
+                dto.query.trim().toLowerCase(),
+                pagination,
+            ),
+            () => {
+                const baseConditions = this.filterService.buildBaseConditions()
+                const filterConditions = this.filterService.build(
+                    { ...dto, ...filters },
+                    FilterScope.PRODUCT_SEARCH,
+                )
+                return this.repository.searchProducts(
+                    [...baseConditions, ...filterConditions],
+                    pagination,
+                )
+            },
+        )
+    }
 
     async fetchRecommendedProducts(
         pid: number,

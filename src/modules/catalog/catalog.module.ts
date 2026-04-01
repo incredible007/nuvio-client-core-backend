@@ -17,6 +17,7 @@ import {
 import { CatalogQueryService } from '@/modules/catalog/services/catalog-query.service'
 import { CatalogFilterService } from '@/modules/catalog/services/catalog-filter.service'
 import { CatalogCacheService } from '@/modules/catalog/services/catalog-cache.service'
+import { ProductSearchStrategy } from '@/modules/catalog/strategies/product-search.strategy'
 
 @Module({
     controllers: [CatalogController],
@@ -35,6 +36,7 @@ import { CatalogCacheService } from '@/modules/catalog/services/catalog-cache.se
         ProductVariantFilter,
         NameFilterStrategy,
         ArticleNumberFilter,
+        ProductSearchStrategy,
 
         {
             provide: CATALOG_REPOSITORY,
@@ -51,6 +53,7 @@ import { CatalogCacheService } from '@/modules/catalog/services/catalog-cache.se
                 productVariant: ProductVariantFilter,
                 name: NameFilterStrategy,
                 articleNumber: ArticleNumberFilter,
+                productSearch: ProductSearchStrategy,
             ) => [
                 category,
                 priceRange,
@@ -60,6 +63,7 @@ import { CatalogCacheService } from '@/modules/catalog/services/catalog-cache.se
                 productVariant,
                 name,
                 articleNumber,
+                productSearch,
             ],
             inject: [
                 CategoryFilterStrategy,
@@ -70,6 +74,7 @@ import { CatalogCacheService } from '@/modules/catalog/services/catalog-cache.se
                 ProductVariantFilter,
                 NameFilterStrategy,
                 ArticleNumberFilter,
+                ProductSearchStrategy,
             ],
         },
     ],
