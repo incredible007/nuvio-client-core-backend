@@ -15,8 +15,7 @@ export class CatalogController {
     @Get('fetch_products')
     @ApiOperation({
         summary: 'Получить товары по фильтрам',
-        description:
-            'Возвращает постраничный список товаров с применением фильтров',
+        description: 'Возвращает постраничный список товаров с применением фильтров',
     })
     async fetchProducts(
         @Query() filters: ProductFiltersDto,
@@ -28,19 +27,14 @@ export class CatalogController {
     @Get('fetch_recommended_products')
     @ApiOperation({
         summary: 'Получить рекомендованные товары',
-        description:
-            'Возвращает постраничный список рекомендованных товаров для выбранного товара',
+        description: 'Возвращает постраничный список рекомендованных товаров для выбранного товара',
     })
     async fetchRecommendedProducts(
         @Query() pid: number,
         @Query() paginationOptions: PaginationOptions,
         @Query() filters?: ProductFiltersDto,
     ) {
-        return this.catalogService.fetchRecommendedProducts(
-            pid,
-            paginationOptions,
-            filters,
-        )
+        return this.catalogService.fetchRecommendedProducts(pid, paginationOptions, filters)
     }
 
     @Get('fetch_product')
@@ -76,10 +70,6 @@ export class CatalogController {
         @Query() pagination: PaginationOptions,
         @Query() filters?: ProductFiltersDto,
     ) {
-        return this.catalogService.fetchWishlistProducts(
-            dto,
-            pagination,
-            filters,
-        )
+        return this.catalogService.fetchWishlistProducts(dto, pagination, filters)
     }
 }

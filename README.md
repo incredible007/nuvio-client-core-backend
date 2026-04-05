@@ -315,7 +315,7 @@ src/modules/catalog/
 
 📎 **[Открыть интерактивную схему →](https://dbdiagram.io/d/nuvio-69c809a7fb2db18e3b284758)**
 
-![Database Architecture](./docs/db-schema.png)
+![Database Architecture](_docs/db-schema.png)
 
 ---
 

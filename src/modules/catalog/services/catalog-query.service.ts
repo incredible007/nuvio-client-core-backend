@@ -9,7 +9,7 @@ import {
 import { PaginationOptions } from '@/common/dto/pagination-options.dto'
 import { ProductFiltersDto } from '@/modules/catalog/dto/product-filters.dto'
 import { Product } from '@/modules/catalog/interfaces/product.interface'
-import { eq, SQL } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import * as schema from '@/database/schema'
 import { SearchProductsDto } from '@/modules/catalog/dto/search-products.dto'
 import { WishlistProductsDto } from '@/modules/catalog/dto/wishlist-products.dto'
@@ -33,10 +33,7 @@ export class CatalogQueryService {
             { ...dto, ...filters },
             FilterScope.PRODUCT_SEARCH,
         )
-        return this.repository.fetchProducts(
-            [...baseConditions, ...filterConditions],
-            pagination,
-        )
+        return this.repository.fetchProducts([...baseConditions, ...filterConditions], pagination)
     }
 
     async searchProducts(
@@ -45,11 +42,7 @@ export class CatalogQueryService {
         filters?: ProductFiltersDto,
     ): Promise<Product[]> {
         return this.withCache(
-            this.cacheService.buildKey(
-                'search',
-                dto.query.trim().toLowerCase(),
-                pagination,
-            ),
+            this.cacheService.buildKey('search', dto.query.trim().toLowerCase(), pagination),
             () => {
                 const baseConditions = this.filterService.buildBaseConditions()
                 const filterConditions = this.filterService.build(
@@ -94,42 +87,27 @@ export class CatalogQueryService {
         filters: ProductFiltersDto,
         pagination: PaginationOptions,
     ): Promise<Product[]> {
-        return this.withCache(
-            this.cacheService.buildKey(filters, pagination),
-            () => {
-                const baseConditions = this.filterService.buildBaseConditions()
-                const filterConditions = this.filterService.build(
-                    filters,
-                    FilterScope.PRODUCTS_LIST,
-                )
+        return this.withCache(this.cacheService.buildKey(filters, pagination), () => {
+            const baseConditions = this.filterService.buildBaseConditions()
+            const filterConditions = this.filterService.build(filters, FilterScope.PRODUCTS_LIST)
 
-                return this.repository.fetchProducts(
-                    [...baseConditions, ...filterConditions],
-                    pagination,
-                )
-            },
-        )
+            return this.repository.fetchProducts(
+                [...baseConditions, ...filterConditions],
+                pagination,
+            )
+        })
     }
 
     async fetchProduct(pid: number): Promise<Product> {
-        return this.withCache(
-            this.cacheService.buildKey(pid, 'product'),
-            () => {
-                const baseConditions = this.filterService.buildBaseConditions()
-                const currConditions = [eq(schema.products.pid, pid)]
+        return this.withCache(this.cacheService.buildKey(pid, 'product'), () => {
+            const baseConditions = this.filterService.buildBaseConditions()
+            const currConditions = [eq(schema.products.pid, pid)]
 
-                return this.repository.fetchProduct([
-                    ...baseConditions,
-                    ...currConditions,
-                ])
-            },
-        )
+            return this.repository.fetchProduct([...baseConditions, ...currConditions])
+        })
     }
 
-    private async withCache<T>(
-        key: string,
-        fetcher: () => Promise<T>,
-    ): Promise<T> {
+    private async withCache<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
         const cached = await this.cacheService.get<T>(key)
         if (cached) return cached
         const result = await fetcher()
