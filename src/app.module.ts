@@ -7,6 +7,7 @@ import { appConfig } from '@/config/app.config'
 import { envSchema } from '@/config/env.schema'
 import { redisConfig } from '@/config/redis.config'
 import { DatabaseModule } from '@/database/database.module'
+import { SubscriptionsModule } from '@/modules/subscriptions/subscriptions.module'
 
 @Module({
     imports: [
@@ -16,10 +17,7 @@ import { DatabaseModule } from '@/database/database.module'
             validate: (env) => {
                 const result = envSchema.safeParse(env)
                 if (!result.success) {
-                    console.error(
-                        '❌ Invalid env:',
-                        result.error.flatten().fieldErrors,
-                    )
+                    console.error('❌ Invalid env:', result.error.flatten().fieldErrors)
                     process.exit(1)
                 }
                 return result.data
@@ -33,8 +31,10 @@ import { DatabaseModule } from '@/database/database.module'
             port: 6379,
             ttl: 60,
         }),
+
         CatalogModule,
         DatabaseModule,
+        SubscriptionsModule,
     ],
     controllers: [],
     providers: [],
