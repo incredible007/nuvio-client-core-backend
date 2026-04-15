@@ -34,22 +34,15 @@ export class CatalogRepository implements ICatalogRepository {
 
         return {
             where: whereClauses.length > 0 ? and(...whereClauses) : undefined,
-            orderBy:
-                orderByClauses.length > 0 ? and(...orderByClauses) : undefined,
+            orderBy: orderByClauses.length > 0 ? and(...orderByClauses) : undefined,
         }
     }
 
-    async searchProducts(
-        conditions: SQL[],
-        pagination: PaginationOptions,
-    ): Promise<Product[]> {
+    async searchProducts(conditions: SQL[], pagination: PaginationOptions): Promise<Product[]> {
         const { page, limit } = pagination
         const offset = (page - 1) * limit
         const { where, orderBy } = this.resolveConditions(conditions)
-        const query = this.baseProductQuery()
-            .where(where)
-            .limit(limit)
-            .offset(offset)
+        const query = this.baseProductQuery().where(where).limit(limit).offset(offset)
         const rows = await (orderBy ? query.orderBy(orderBy) : query)
         const locs = await this.fetchProductLocalizations(rows)
         return rows.map((row) => this.mapRow(row, locs))
@@ -82,81 +75,52 @@ export class CatalogRepository implements ICatalogRepository {
                 country: getTableColumns(schema.dCountries),
             })
             .from(schema.products)
-            .leftJoin(
-                schema.vendors,
-                eq(schema.products.vendorOwnerId, schema.vendors.vid),
-            )
+            .leftJoin(schema.vendors, eq(schema.products.vendorOwnerId, schema.vendors.vid))
             .leftJoin(
                 schema.productCategories,
                 eq(schema.productCategories.pcid, schema.products.pcid),
             )
-            .leftJoin(
-                schema.dBrands,
-                eq(schema.dBrands.id, schema.products.brandId),
-            )
-            .leftJoin(
-                schema.dCountries,
-                eq(schema.dCountries.id, schema.products.countryId),
-            )
+            .leftJoin(schema.dBrands, eq(schema.dBrands.id, schema.products.brandId))
+            .leftJoin(schema.dCountries, eq(schema.dCountries.id, schema.products.countryId))
     }
 
     private async fetchProductLocalizations(rows: Product[]) {
         const categoryIds = [
             ...new Set(rows.map((r) => r.category?.pcid).filter(Boolean)),
         ] as number[]
-        const brandIds = [
-            ...new Set(rows.map((r) => r.brand?.id).filter(Boolean)),
-        ] as number[]
-        const countryIds = [
-            ...new Set(rows.map((r) => r.country?.id).filter(Boolean)),
-        ] as number[]
+        const brandIds = [...new Set(rows.map((r) => r.brand?.id).filter(Boolean))] as number[]
+        const countryIds = [...new Set(rows.map((r) => r.country?.id).filter(Boolean))] as number[]
         const productIds = [...new Set(rows.map((r) => r.pid))] as number[]
 
-        const [categoryLocs, brandLocs, countryLocs, productMedia] =
-            await Promise.all([
-                categoryIds.length
-                    ? this.db
-                          .select()
-                          .from(schema.productCategoryLocalizations)
-                          .where(
-                              inArray(
-                                  schema.productCategoryLocalizations.pcid,
-                                  categoryIds,
-                              ),
-                          )
-                    : [],
-                brandIds.length
-                    ? this.db
-                          .select()
-                          .from(schema.dBrandValuesLocalizations)
-                          .where(
-                              inArray(
-                                  schema.dBrandValuesLocalizations.id,
-                                  brandIds,
-                              ),
-                          )
-                    : [],
-                countryIds.length
-                    ? this.db
-                          .select()
-                          .from(schema.dCountryValuesLocalizations)
-                          .where(
-                              inArray(
-                                  schema.dCountryValuesLocalizations.id,
-                                  countryIds,
-                              ),
-                          )
-                    : [],
-                productIds.length
-                    ? this.db
-                          .select({
-                              ...getTableColumns(schema.productMedia),
-                              media: getTableColumns(schema.media),
-                          })
-                          .from(schema.productMedia)
-                          .where(inArray(schema.productMedia.pid, productIds))
-                    : [],
-            ])
+        const [categoryLocs, brandLocs, countryLocs, productMedia] = await Promise.all([
+            categoryIds.length
+                ? this.db
+                      .select()
+                      .from(schema.productCategoryLocalizations)
+                      .where(inArray(schema.productCategoryLocalizations.pcid, categoryIds))
+                : [],
+            brandIds.length
+                ? this.db
+                      .select()
+                      .from(schema.dBrandValuesLocalizations)
+                      .where(inArray(schema.dBrandValuesLocalizations.id, brandIds))
+                : [],
+            countryIds.length
+                ? this.db
+                      .select()
+                      .from(schema.dCountryValuesLocalizations)
+                      .where(inArray(schema.dCountryValuesLocalizations.id, countryIds))
+                : [],
+            productIds.length
+                ? this.db
+                      .select({
+                          ...getTableColumns(schema.productMedia),
+                          media: getTableColumns(schema.media),
+                      })
+                      .from(schema.productMedia)
+                      .where(inArray(schema.productMedia.pid, productIds))
+                : [],
+        ])
 
         return {
             categoryLocMap: Map.groupBy(categoryLocs, (l) => l.pcid),
@@ -171,8 +135,7 @@ export class CatalogRepository implements ICatalogRepository {
         locMaps: Awaited<ReturnType<typeof this.fetchProductLocalizations>>,
     ): Product {
         const { category, vendor, brand, country, ...product } = row
-        const { categoryLocMap, brandLocMap, countryLocMap, productMedia } =
-            locMaps
+        const { categoryLocMap, brandLocMap, countryLocMap, productMedia } = locMaps
         return {
             ...product,
             vendor,
@@ -182,9 +145,7 @@ export class CatalogRepository implements ICatalogRepository {
                       localizations: categoryLocMap.get(category.pcid) ?? [],
                   }
                 : null,
-            brand: brand?.id
-                ? { ...brand, localizations: brandLocMap.get(brand.id) ?? [] }
-                : null,
+            brand: brand?.id ? { ...brand, localizations: brandLocMap.get(brand.id) ?? [] } : null,
             country: country?.id
                 ? {
                       ...country,
@@ -196,11 +157,8 @@ export class CatalogRepository implements ICatalogRepository {
     }
 
     async fetchProduct(conditions: SQL[]): Promise<Product> {
-        const whereCondition =
-            conditions.length > 0 ? and(...conditions) : undefined
-        const rows = await this.baseProductQuery()
-            .where(whereCondition)
-            .limit(1)
+        const whereCondition = conditions.length > 0 ? and(...conditions) : undefined
+        const rows = await this.baseProductQuery().where(whereCondition).limit(1)
         const locs = await this.fetchProductLocalizations(rows)
         const productReviews = await this.db
             .select({
@@ -208,10 +166,7 @@ export class CatalogRepository implements ICatalogRepository {
                 client: getTableColumns(schema.clients),
             })
             .from(schema.productReviews)
-            .leftJoin(
-                schema.clients,
-                eq(schema.productReviews.cid, schema.clients.cid),
-            )
+            .leftJoin(schema.clients, eq(schema.productReviews.cid, schema.clients.cid))
             .where(eq(schema.productReviews.pid, rows[0].pid))
             .limit(20)
 
@@ -223,18 +178,11 @@ export class CatalogRepository implements ICatalogRepository {
         }
     }
 
-    async fetchProducts(
-        conditions: SQL[],
-        pagination: PaginationOptions,
-    ): Promise<Product[]> {
+    async fetchProducts(conditions: SQL[], pagination: PaginationOptions): Promise<Product[]> {
         const { page, limit } = pagination
         const offset = (page - 1) * limit
-        const whereCondition =
-            conditions.length > 0 ? and(...conditions) : undefined
-        const rows = await this.baseProductQuery()
-            .where(whereCondition)
-            .offset(offset)
-            .limit(limit)
+        const whereCondition = conditions.length > 0 ? and(...conditions) : undefined
+        const rows = await this.baseProductQuery().where(whereCondition).offset(offset).limit(limit)
         const locs = await this.fetchProductLocalizations(rows)
         return rows.map((row) => this.mapRow(row, locs))
     }

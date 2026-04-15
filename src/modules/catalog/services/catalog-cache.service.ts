@@ -36,34 +36,19 @@ export class CatalogCacheService {
         filters?: ProductFiltersDto,
     ): string
     buildKey(filters: ProductFiltersDto, pagination: PaginationOptions): string
-    buildKey(
-        scope: 'search',
-        query: string,
-        pagination: PaginationOptions,
-    ): string
+    buildKey(scope: 'search', query: string, pagination: PaginationOptions): string
     buildKey(
         filtersOrIdOrScope: ProductFiltersDto | number | 'search',
-        scopeOrPaginationOrQuery?:
-            | 'product'
-            | 'recommended'
-            | PaginationOptions
-            | string,
+        scopeOrPaginationOrQuery?: 'product' | 'recommended' | PaginationOptions | string,
         pagination?: PaginationOptions,
         filters?: ProductFiltersDto,
     ): string {
         if (filtersOrIdOrScope === 'search') {
-            return CacheKeyFactory.forSearch(
-                scopeOrPaginationOrQuery as string,
-                pagination!,
-            )
+            return CacheKeyFactory.forSearch(scopeOrPaginationOrQuery as string, pagination!)
         }
         if (typeof filtersOrIdOrScope === 'number') {
             if (scopeOrPaginationOrQuery === 'recommended') {
-                return CacheKeyFactory.forRecommended(
-                    filtersOrIdOrScope,
-                    pagination!,
-                    filters,
-                )
+                return CacheKeyFactory.forRecommended(filtersOrIdOrScope, pagination!, filters)
             }
             return CacheKeyFactory.forProduct(filtersOrIdOrScope)
         }

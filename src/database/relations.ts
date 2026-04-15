@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { clients, clientPayoutRequests, clientPayoutRequisites, clientReferrals, media, clientReferralsAccountTransactions, productRefunds, orders, products, clientAddresses, bankCardTokens, vendors, vendorRequisites, vendorAccounts, vendorAccountTransactions, vendorPayoutRequests, vendorBankRequisites, dTransportCompanies, vendorPhoneAuth, clientsPhoneAuth, productPrices, dCountries, managers, managerPasswordAuth, productCategories, dBrands, productSubscribers, productSubBills, productReviews, clientReviews, clientPaymentMethods, localDiscounts, orderToProducts, recommendedProducts, productComplaints, adminNotifications, authSessions, vendorComplaints, userGeolocations, conversations, productCategoryProps, convParticipants, convMessages, systemNotifications, managerNotifications, vendorReviews, productRefundMedia, productProps, productCustomProps, productReviewMedia, clientReviewMedia, globalDiscounts, categoryDiscounts, vendorProductDiscounts, productComplaintMedia, vendorComplaintMedia, managersAccessPermits, accessPermits, vendorReviewMedia, clientFavProducts, adminNotificationReadStates, dCountryValuesLocalizations, dBrandValuesLocalizations, dTransportCompaniesLocalizations, globalDiscountMembers, dCustom, dCustomValuesLocalizations, productCategoryLocalizations, productMedia, productCategoryPropLocalization, productCustomPropLocalizations, productRemains, productLocalizations, articlePublications, articlePublicationLocalizations, newsPublications, newsPublicationLocalizations } from "./schema";
+import { clients, clientPayoutRequests, clientPayoutRequisites, clientReferrals, clientReferralsAccountTransactions, productRefunds, orders, products, clientAddresses, bankCardTokens, media, vendors, vendorRequisites, vendorAccounts, vendorAccountTransactions, vendorPayoutRequests, vendorBankRequisites, dTransportCompanies, vendorPhoneAuth, clientsPhoneAuth, managers, managerPasswordAuth, productCategories, dCountries, dBrands, productReviews, clientReviews, clientPaymentMethods, localDiscounts, orderToProducts, recommendedProducts, productComplaints, adminNotifications, authSessions, vendorComplaints, userGeolocations, conversations, productCategoryProps, convParticipants, convMessages, systemNotifications, managerNotifications, vendorReviews, productPrices, productSubBills, subscriptionRefunds, productSubscribers, subscriptionAuditLogs, subscriptionReminders, productRefundMedia, productProps, productCustomProps, productReviewMedia, clientReviewMedia, globalDiscounts, categoryDiscounts, vendorProductDiscounts, productComplaintMedia, vendorComplaintMedia, managersAccessPermits, accessPermits, vendorReviewMedia, clientFavProducts, adminNotificationReadStates, dCountryValuesLocalizations, dBrandValuesLocalizations, dTransportCompaniesLocalizations, globalDiscountMembers, dCustom, dCustomValuesLocalizations, productCategoryLocalizations, productMedia, productCategoryPropLocalization, productCustomPropLocalizations, productRemains, productLocalizations, articlePublications, articlePublicationLocalizations, newsPublications, newsPublicationLocalizations } from "./schema";
 
 export const clientPayoutRequestsRelations = relations(clientPayoutRequests, ({one}) => ({
 	client: one(clients, {
@@ -20,15 +20,14 @@ export const clientsRelations = relations(clients, ({one, many}) => ({
 	clientReferrals_reffererCid: many(clientReferrals, {
 		relationName: "clientReferrals_reffererCid_clients_cid"
 	}),
+	clientPayoutRequisites: many(clientPayoutRequisites),
+	productRefunds: many(productRefunds),
 	media: one(media, {
 		fields: [clients.avatarId],
 		references: [media.mid]
 	}),
-	clientPayoutRequisites: many(clientPayoutRequisites),
-	productRefunds: many(productRefunds),
 	clientAddresses: many(clientAddresses),
 	clientsPhoneAuths: many(clientsPhoneAuth),
-	productSubscribers: many(productSubscribers),
 	productReviews: many(productReviews),
 	clientReviews: many(clientReviews),
 	orders: many(orders),
@@ -39,8 +38,9 @@ export const clientsRelations = relations(clients, ({one, many}) => ({
 	userGeolocations: many(userGeolocations),
 	convParticipants: many(convParticipants),
 	convMessages: many(convMessages),
-	clientPaymentMethods: many(clientPaymentMethods),
 	vendorReviews: many(vendorReviews),
+	productSubscribers: many(productSubscribers),
+	clientPaymentMethods: many(clientPaymentMethods),
 	clientFavProducts: many(clientFavProducts),
 }));
 
@@ -64,22 +64,6 @@ export const clientReferralsRelations = relations(clientReferrals, ({one, many})
 		relationName: "clientReferrals_reffererCid_clients_cid"
 	}),
 	clientReferralsAccountTransactions: many(clientReferralsAccountTransactions),
-}));
-
-export const mediaRelations = relations(media, ({many}) => ({
-	clients: many(clients),
-	vendors: many(vendors),
-	conversations: many(conversations),
-	productRefundMedias: many(productRefundMedia),
-	productReviewMedias: many(productReviewMedia),
-	clientReviewMedias: many(clientReviewMedia),
-	productComplaintMedias: many(productComplaintMedia),
-	vendorComplaintMedias: many(vendorComplaintMedia),
-	vendorReviewMedias: many(vendorReviewMedia),
-	productCategoryLocalizations: many(productCategoryLocalizations),
-	productMedias: many(productMedia),
-	articlePublicationLocalizations: many(articlePublicationLocalizations),
-	newsPublicationLocalizations: many(newsPublicationLocalizations),
 }));
 
 export const clientReferralsAccountTransactionsRelations = relations(clientReferralsAccountTransactions, ({one}) => ({
@@ -127,7 +111,6 @@ export const ordersRelations = relations(orders, ({one, many}) => ({
 
 export const productsRelations = relations(products, ({one, many}) => ({
 	productRefunds: many(productRefunds),
-	productPrices: many(productPrices),
 	vendor: one(vendors, {
 		fields: [products.vendorOwnerId],
 		references: [vendors.vid]
@@ -144,7 +127,6 @@ export const productsRelations = relations(products, ({one, many}) => ({
 		fields: [products.brandId],
 		references: [dBrands.id]
 	}),
-	productSubscribers: many(productSubscribers),
 	productReviews: many(productReviews),
 	orderToProducts: many(orderToProducts),
 	recommendedProducts_productId: many(recommendedProducts, {
@@ -156,6 +138,8 @@ export const productsRelations = relations(products, ({one, many}) => ({
 	productComplaints: many(productComplaints),
 	adminNotifications: many(adminNotifications),
 	conversations: many(conversations),
+	productPrices: many(productPrices),
+	productSubscribers: many(productSubscribers),
 	productProps: many(productProps),
 	vendorProductDiscounts: many(vendorProductDiscounts),
 	clientFavProducts: many(clientFavProducts),
@@ -184,6 +168,22 @@ export const clientAddressesRelations = relations(clientAddresses, ({one, many})
 	orders: many(orders),
 }));
 
+export const mediaRelations = relations(media, ({many}) => ({
+	clients: many(clients),
+	conversations: many(conversations),
+	vendors: many(vendors),
+	productRefundMedias: many(productRefundMedia),
+	productReviewMedias: many(productReviewMedia),
+	clientReviewMedias: many(clientReviewMedia),
+	productComplaintMedias: many(productComplaintMedia),
+	vendorComplaintMedias: many(vendorComplaintMedia),
+	vendorReviewMedias: many(vendorReviewMedia),
+	productCategoryLocalizations: many(productCategoryLocalizations),
+	productMedias: many(productMedia),
+	articlePublicationLocalizations: many(articlePublicationLocalizations),
+	newsPublicationLocalizations: many(newsPublicationLocalizations),
+}));
+
 export const vendorRequisitesRelations = relations(vendorRequisites, ({one, many}) => ({
 	vendor: one(vendors, {
 		fields: [vendorRequisites.vid],
@@ -194,10 +194,6 @@ export const vendorRequisitesRelations = relations(vendorRequisites, ({one, many
 
 export const vendorsRelations = relations(vendors, ({one, many}) => ({
 	vendorRequisites: many(vendorRequisites),
-	media: one(media, {
-		fields: [vendors.avatarId],
-		references: [media.mid]
-	}),
 	vendorPhoneAuths: many(vendorPhoneAuth),
 	products: many(products),
 	clientReviews: many(clientReviews),
@@ -211,6 +207,10 @@ export const vendorsRelations = relations(vendors, ({one, many}) => ({
 	vendorAccounts: many(vendorAccounts),
 	vendorReviews: many(vendorReviews),
 	systemNotifications: many(systemNotifications),
+	media: one(media, {
+		fields: [vendors.avatarId],
+		references: [media.mid]
+	}),
 	globalDiscountMembers: many(globalDiscountMembers),
 	productRemains: many(productRemains),
 }));
@@ -273,25 +273,6 @@ export const clientsPhoneAuthRelations = relations(clientsPhoneAuth, ({one}) => 
 	}),
 }));
 
-export const productPricesRelations = relations(productPrices, ({one, many}) => ({
-	product: one(products, {
-		fields: [productPrices.pid],
-		references: [products.pid]
-	}),
-	dCountry: one(dCountries, {
-		fields: [productPrices.countryId],
-		references: [dCountries.id]
-	}),
-	productSubscribers: many(productSubscribers),
-}));
-
-export const dCountriesRelations = relations(dCountries, ({many}) => ({
-	productPrices: many(productPrices),
-	products: many(products),
-	dCountryValuesLocalizations: many(dCountryValuesLocalizations),
-	productRemains: many(productRemains),
-}));
-
 export const managerPasswordAuthRelations = relations(managerPasswordAuth, ({one}) => ({
 	manager: one(managers, {
 		fields: [managerPasswordAuth.managerId],
@@ -324,32 +305,16 @@ export const productCategoriesRelations = relations(productCategories, ({one, ma
 	productCategoryLocalizations: many(productCategoryLocalizations),
 }));
 
+export const dCountriesRelations = relations(dCountries, ({many}) => ({
+	products: many(products),
+	productPrices: many(productPrices),
+	dCountryValuesLocalizations: many(dCountryValuesLocalizations),
+	productRemains: many(productRemains),
+}));
+
 export const dBrandsRelations = relations(dBrands, ({many}) => ({
 	products: many(products),
 	dBrandValuesLocalizations: many(dBrandValuesLocalizations),
-}));
-
-export const productSubscribersRelations = relations(productSubscribers, ({one, many}) => ({
-	product: one(products, {
-		fields: [productSubscribers.pid],
-		references: [products.pid]
-	}),
-	client: one(clients, {
-		fields: [productSubscribers.cid],
-		references: [clients.cid]
-	}),
-	productPrice: one(productPrices, {
-		fields: [productSubscribers.productPrice],
-		references: [productPrices.ppid]
-	}),
-	productSubBills: many(productSubBills),
-}));
-
-export const productSubBillsRelations = relations(productSubBills, ({one}) => ({
-	productSubscriber: one(productSubscribers, {
-		fields: [productSubBills.psid],
-		references: [productSubscribers.psid]
-	}),
 }));
 
 export const productReviewsRelations = relations(productReviews, ({one, many}) => ({
@@ -603,6 +568,75 @@ export const vendorReviewsRelations = relations(vendorReviews, ({one, many}) => 
 		references: [clients.cid]
 	}),
 	vendorReviewMedias: many(vendorReviewMedia),
+}));
+
+export const productPricesRelations = relations(productPrices, ({one, many}) => ({
+	product: one(products, {
+		fields: [productPrices.pid],
+		references: [products.pid]
+	}),
+	dCountry: one(dCountries, {
+		fields: [productPrices.countryId],
+		references: [dCountries.id]
+	}),
+	productSubscribers: many(productSubscribers),
+}));
+
+export const subscriptionRefundsRelations = relations(subscriptionRefunds, ({one}) => ({
+	productSubBill: one(productSubBills, {
+		fields: [subscriptionRefunds.psbid],
+		references: [productSubBills.psbid]
+	}),
+	productSubscriber: one(productSubscribers, {
+		fields: [subscriptionRefunds.psid],
+		references: [productSubscribers.psid]
+	}),
+}));
+
+export const productSubBillsRelations = relations(productSubBills, ({one, many}) => ({
+	subscriptionRefunds: many(subscriptionRefunds),
+	subscriptionReminders: many(subscriptionReminders),
+	productSubscriber: one(productSubscribers, {
+		fields: [productSubBills.psid],
+		references: [productSubscribers.psid]
+	}),
+}));
+
+export const productSubscribersRelations = relations(productSubscribers, ({one, many}) => ({
+	subscriptionRefunds: many(subscriptionRefunds),
+	subscriptionAuditLogs: many(subscriptionAuditLogs),
+	subscriptionReminders: many(subscriptionReminders),
+	product: one(products, {
+		fields: [productSubscribers.pid],
+		references: [products.pid]
+	}),
+	client: one(clients, {
+		fields: [productSubscribers.cid],
+		references: [clients.cid]
+	}),
+	productPrice: one(productPrices, {
+		fields: [productSubscribers.productPrice],
+		references: [productPrices.ppid]
+	}),
+	productSubBills: many(productSubBills),
+}));
+
+export const subscriptionAuditLogsRelations = relations(subscriptionAuditLogs, ({one}) => ({
+	productSubscriber: one(productSubscribers, {
+		fields: [subscriptionAuditLogs.psid],
+		references: [productSubscribers.psid]
+	}),
+}));
+
+export const subscriptionRemindersRelations = relations(subscriptionReminders, ({one}) => ({
+	productSubscriber: one(productSubscribers, {
+		fields: [subscriptionReminders.psid],
+		references: [productSubscribers.psid]
+	}),
+	productSubBill: one(productSubBills, {
+		fields: [subscriptionReminders.psbid],
+		references: [productSubBills.psbid]
+	}),
 }));
 
 export const productRefundMediaRelations = relations(productRefundMedia, ({one}) => ({
