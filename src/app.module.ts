@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common'
 import { CacheModule } from '@nestjs/cache-manager'
-import { ioRedisStore } from '@tirke/node-cache-manager-ioredis'
 import { CatalogModule } from './modules/catalog/catalog.module'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { appConfig } from '@/config/app.config'
 import { envSchema } from '@/config/env.schema'
 import { redisConfig } from '@/config/redis.config'
 import { DatabaseModule } from '@/database/database.module'
 import { SubscriptionsModule } from '@/modules/subscriptions/subscriptions.module'
+import { createKeyv } from '@keyv/redis'
 
 @Module({
     imports: [
@@ -24,12 +24,28 @@ import { SubscriptionsModule } from '@/modules/subscriptions/subscriptions.modul
             },
         }),
 
-        CacheModule.register({
+        CacheModule.registerAsync({
             isGlobal: true,
-            store: ioRedisStore,
-            host: 'localhost',
-            port: 6379,
-            ttl: 60,
+            inject: [ConfigService],
+            useFactory: (config: ConfigService) => {
+                const host = config.get<string>('redis.host')
+                const port = config.get<number>('redis.port')
+                const ttl = config.get<number>('redis.ttl')
+
+                const redisStore = createKeyv(`redis://${host}:${port}`)
+
+                redisStore.on('error', (err) => {
+                    console.error(
+                        '❌ Redis connection failed, falling back to in-memory:',
+                        err.message,
+                    )
+                })
+
+                return {
+                    stores: [redisStore],
+                    ttl,
+                }
+            },
         }),
 
         CatalogModule,

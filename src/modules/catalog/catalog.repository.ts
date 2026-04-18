@@ -118,6 +118,7 @@ export class CatalogRepository implements ICatalogRepository {
                           media: getTableColumns(schema.media),
                       })
                       .from(schema.productMedia)
+                      .innerJoin(schema.media, eq(schema.media.mid, schema.productMedia.mediaId))
                       .where(inArray(schema.productMedia.pid, productIds))
                 : [],
         ])

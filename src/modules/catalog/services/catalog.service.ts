@@ -10,10 +10,7 @@ import { WishlistProductsDto } from '@/modules/catalog/dto/wishlist-products.dto
 export class CatalogService {
     constructor(private readonly queryService: CatalogQueryService) {}
 
-    async fetchProducts(
-        filters: ProductFiltersDto,
-        pagination: PaginationOptions,
-    ) {
+    async fetchProducts(filters: ProductFiltersDto, pagination: PaginationOptions) {
         return this.queryService.fetchProducts(filters, pagination)
     }
 
@@ -30,11 +27,7 @@ export class CatalogService {
         pagination: PaginationOptions,
         filters?: ProductFiltersDto,
     ) {
-        return this.queryService.fetchRecommendedProducts(
-            pid,
-            pagination,
-            filters,
-        )
+        return this.queryService.fetchRecommendedProducts(pid, pagination, filters)
     }
 
     async fetchWishlistProducts(

@@ -20,7 +20,7 @@ export class CatalogCacheService {
         await this.cache.set(key, value, this.TTL)
     }
 
-    async invalidateProducts(
+    async invalidateCache(
         filters: ProductFiltersDto,
         pagination: PaginationOptions,
     ): Promise<void> {
