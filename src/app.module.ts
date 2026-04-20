@@ -8,6 +8,7 @@ import { redisConfig } from '@/config/redis.config'
 import { DatabaseModule } from '@/database/database.module'
 import { SubscriptionsModule } from '@/modules/subscriptions/subscriptions.module'
 import { createKeyv } from '@keyv/redis'
+import { BullModule } from '@nestjs/bullmq'
 
 @Module({
     imports: [
@@ -22,6 +23,16 @@ import { createKeyv } from '@keyv/redis'
                 }
                 return result.data
             },
+        }),
+
+        BullModule.forRootAsync({
+            useFactory: (config: ConfigService) => ({
+                connection: {
+                    host: config.get<string>('redis.host'),
+                    port: config.get<number>('redis.port'),
+                },
+            }),
+            inject: [ConfigService],
         }),
 
         CacheModule.registerAsync({

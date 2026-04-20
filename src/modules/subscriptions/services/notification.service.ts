@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common'
 
 @Injectable()
-export class NotificationService {}
+export class NotificationService {
+    async sendPaymentReminder(clientId: string, dto: object) {}
+}

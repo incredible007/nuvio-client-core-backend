@@ -1,7 +1,8 @@
-import e from 'express'
-
 export enum SubscriptionStatus {
-    ACTIVE = 'ACTIVE',
-    INACTIVE = 'INACTIVE',
-    PENDING = 'PENDING',
+    REMINDER = 'REMINDER',
+    RETRY_PAYMENT = 'RETRY_PAYMENT',
+    CANCEL = 'CANCEL',
+    PAUSE = 'PAUSE',
 }
+
+export const SUBSCRIPTION_QUEUE = 'SUBSCRIPTION_QUEUE'
